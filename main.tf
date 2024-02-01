@@ -9,6 +9,8 @@ locals {
     // Iterate through data.oci_identity_availability_domains.ad and create a list containing AD names
     for i in data.oci_identity_availability_domains.ad.availability_domains : i.name
   ]
+  network_cmp_id  = try(data.oci_identity_compartments.network[0].compartments[0].id, var.network_cmp_id)
+  subnet_id       = try(data.oci_core_subnets.subnet[0].subnets[0].id, var.subnet_id)
 }
 
 # This resource provides the Node Pool resource in Oracle Cloud Infrastructure Container Engine service.
@@ -37,7 +39,7 @@ resource "oci_containerengine_node_pool" "main" {
 
       content {
         availability_domain = can(placement_configs.key) ? element(local.ADs, placement_configs.key) : element(local.ADs, 0)
-        subnet_id           = var.subnet_id
+        subnet_id           = local.subnet_id
       }
     }
     #Required
